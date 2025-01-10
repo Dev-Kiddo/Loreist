@@ -10,4 +10,4 @@ Welcome to the repository of Loreist Website, a clean and modern sample website 
 HTML: For creating the website structure.
 CSS: For designing and styling the website.
 JavaScript: For adding interactivity and functionality.
-<h3>🌐 Live Demo</h3> <h4>Explore the live version of the website here:</h4> <h4><a href="https://yourusername.github.io/LoreistWebsite/">Loreist Website 🌐✨</a></h4>
+<h3>🌐 Live Demo</h3> <h4>Explore the live version of the website here:</h4> <h4><a href=" https://dev-kiddo.github.io/Loreist/">Loreist Website 🌐✨</a></h4>
