@@ -134,6 +134,263 @@ tabContainer.addEventListener("click", function (e) {
 });
 
 // ----------------------------------------
+// Menu Fade Animation
+// ----------------------------------------
+
+const nav = document.querySelector(".nav");
+
+const mouseHover = function (e) {
+  // console.log(this); 1
+  // console.log(e.currentTarget); target element
+
+  if (e.target.classList.contains("nav__link")) {
+    const link = e.target;
+    // console.log(link);
+    const siblings = link.closest(".nav").querySelectorAll(".nav__link");
+    const logo = link.closest(".nav").querySelector("img");
+    // console.log("link:", link);
+    // console.log("sibling:", siblings);
+    // console.log("logo:", logo);
+    siblings.forEach((sib) => {
+      if (sib !== link) {
+        sib.style.opacity = this;
+        logo.style.opacity = this;
+      }
+    });
+  }
+};
+
+nav.addEventListener("mouseover", mouseHover.bind(0.5));
+
+// nav.addEventListener("mouseout", function (e) {
+//   mouseHover(e, 1);
+// });
+
+nav.addEventListener("mouseout", mouseHover.bind(1));
+
+// ----------------------------------------
+// Sticky Navigaion // this method will trigger scroll all the time.
+// ----------------------------------------
+// const stickyCoords = section1.getBoundingClientRect();
+// // console.log(stickyCoords);
+
+// window.addEventListener("scroll", function () {
+//   // console.log("window.ScrollY:", window.scrollY);
+//   // console.log("BoundingClientRect:", stickyCoords.top);
+
+//   if (this.window.scrollY > stickyCoords.top) {
+//     nav.classList.add("sticky");
+//   } else {
+//     nav.classList.remove("sticky");
+//   }
+// });
+
+// ----------------------------------------
+// Sticky Navigaion // intersection observer API
+// ----------------------------------------
+// This API allows our code to basically observe changes to the way that a certain target element intersects another element, or the way it intersects the viewport.
+
+const header = document.querySelector(".header");
+// console.log(header);
+
+const navHeight = nav.getBoundingClientRect().height;
+
+// console.log(navHeight);
+
+const stickNav = function (entries, observer) {
+  // console.log("entries:", entries);
+  const [entry] = entries;
+  // console.log("entry:", entry);
+  if (!entry.isIntersecting) {
+    nav.classList.add("sticky");
+  } else {
+    nav.classList.remove("sticky");
+  }
+};
+
+const stickOpt = {
+  root: null,
+  threshold: 0,
+  rootMargin: `-${navHeight}px`,
+};
+
+const observer = new IntersectionObserver(stickNav, stickOpt);
+observer.observe(header);
+
+// ----------------------------------------
+// Scroll-reveal sections
+// ----------------------------------------
+
+const allSections = document.querySelectorAll(".section");
+// console.log(allSections);
+
+const cbRevealer = function (entries, observer) {
+  const [entry] = entries;
+  // console.log("entry:", entry);
+  if (!entry.isIntersecting) return;
+
+  entry.target.classList.remove("section--hidden");
+  observer.unobserve(entry.target);
+
+  // console.log("observer:", observer);
+};
+
+const sectionRevealer = new IntersectionObserver(cbRevealer, { root: null, threshold: 0.15 });
+
+allSections.forEach((section) => {
+  sectionRevealer.observe(section);
+  section.classList.add("section--hidden");
+});
+
+// ----------------------------------------
+// Lazy Loading Images
+// ----------------------------------------
+// to select an element which contains selected attribute, we can do this.
+const lazyTargets = document.querySelectorAll("img[data-src]");
+// console.log("lazyTargets:", lazyTargets);
+
+const cbLazyImg = function (entries, observer) {
+  // console.log("insideCBEntries:", entries);
+  const [entry] = entries;
+  // console.log("entry:", entry);
+
+  if (!entry.isIntersecting) return;
+
+  entry.target.src = entry.target.dataset.src;
+
+  entry.target.addEventListener("load", function () {
+    event.target.classList.remove("lazy-img");
+  });
+
+  observer.unobserve(entry.target);
+};
+
+const lazyObserver = new IntersectionObserver(cbLazyImg, { root: null, threshold: 0 });
+
+// console.log("lazyObserver:", lazyObserver);
+
+lazyTargets.forEach((lazyEl) => lazyObserver.observe(lazyEl));
+
+// ----------------------------------------
+// Slider - Component
+// ----------------------------------------
+const slides = document.querySelectorAll(".slide");
+
+const slider = document.querySelector(".slider");
+
+const sliderBtnLeft = document.querySelector(".slider__btn--left");
+const sliderBtnRight = document.querySelector(".slider__btn--right");
+
+const dotContainer = document.querySelector(".dots");
+
+let currentSlide = 0;
+const maxSlide = slides.length - 1;
+
+// slider.style.transform = `scale(.5)`;
+// slider.style.overflow = `visible`;
+
+// 0%,100%,200%,300%
+slides.forEach((slide, i) => {
+  slide.style.transform = `translateX(${i * 100}%)`;
+});
+
+// ------------------------------------------------------
+// Before Refactoring the Code
+// ------------------------------------------------------
+// sliderBtnRight.addEventListener("click", function (e) {
+//   if (currentSlide === maxSlide) {
+//     currentSlide = 0;
+//   } else {
+//     currentSlide++;
+//   }
+
+//   // -100%,0%,100%,200%
+//   slides.forEach((slide, i) => {
+//     // console.log("i:", i, "currentSlide:", currentSlide);
+//     slide.style.transform = `translateX(${100 * (i - currentSlide)}%)`;
+//   });
+// });
+
+// sliderBtnLeft.addEventListener("click", function (e) {
+//   if (currentSlide === 0) {
+//     currentSlide = maxSlide;
+//   } else {
+//     currentSlide--;
+//   }
+
+//   slides.forEach((slide, i) => {
+//     console.log(i, currentSlide);
+//     slide.style.transform = `translateX(${100 * (i - currentSlide)}%)`;
+//   });
+// });
+
+// Creating Dots here
+const createDots = function () {
+  slides.forEach((_, i) => {
+    dotContainer.insertAdjacentHTML("beforeend", `<button class="dots__dot" data-slide=${i}></button>`);
+  });
+};
+createDots();
+
+const activeDots = function (slide) {
+  document.querySelectorAll(".dots__dot").forEach((dot) => dot.classList.remove("dots__dot--active"));
+
+  document.querySelector(`.dots__dot[data-slide="${slide}"]`).classList.add("dots__dot--active");
+};
+
+activeDots(0);
+
+// Goto the slide
+const gotoSlide = function (curSlide) {
+  slides.forEach((slide, i) => {
+    slide.style.transform = `translateX(${100 * (i - curSlide)}%)`;
+  });
+};
+// gotoSlide(0);
+
+const nextSlide = function () {
+  if (currentSlide === maxSlide) {
+    currentSlide = 0;
+  } else {
+    currentSlide++;
+  }
+
+  gotoSlide(currentSlide);
+  activeDots(currentSlide);
+};
+
+const pervSlide = function () {
+  if (currentSlide === 0) {
+    currentSlide = maxSlide;
+  } else {
+    currentSlide--;
+  }
+
+  gotoSlide(currentSlide);
+  activeDots(currentSlide);
+};
+
+sliderBtnRight.addEventListener("click", nextSlide);
+
+sliderBtnLeft.addEventListener("click", pervSlide);
+
+// KeyBoard Functionalities
+
+document.addEventListener("keydown", function (e) {
+  // console.log(e);
+  if (e.key === "ArrowRight") nextSlide();
+  e.key === "ArrowLeft" && pervSlide();
+});
+
+// if we click dot, it will goes to that slide.
+dotContainer.addEventListener("click", function (e) {
+  if (e.target.classList.contains("dots__dot")) {
+    const slide = e.target.dataset.slide;
+    gotoSlide(slide);
+    activeDots(slide);
+  }
+});
+// ----------------------------------------
 // Cookie- Message
 // ----------------------------------------
 // Creating and inserting elements
@@ -214,7 +471,7 @@ tabContainer.addEventListener("click", function (e) {
 
 // it does not matter if we are listining it or not.
 
-// ----------------------------------------------
+// ----------------------------------------------------------
 
 // ----------------------------------------------------------
 // Bubbling and Capturing
